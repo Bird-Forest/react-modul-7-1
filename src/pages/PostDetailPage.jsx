@@ -8,18 +8,15 @@ import {
   useParams,
 } from 'react-router-dom';
 
-import { findPostById } from 'servise/api';
+// import { findPostById } from 'servise/api';
 import Loader from 'components/Loader';
 import ErrorMessage from 'components/Error';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  addPosts,
-  setError,
-  setisLoading,
-  setPostDetails,
-} from 'redux/postDetailsRedux';
+import { addPosts } from 'redux/postDetailsRedux';
+import { requestPostDatails } from 'redux/thunkAPI';
 
 const CommentPage = lazy(() => import('pages/CommentPage'));
+
 export default function PostDetailPage() {
   const { postId } = useParams();
   const location = useLocation();
@@ -31,18 +28,11 @@ export default function PostDetailPage() {
   const dispatch = useDispatch();
   useEffect(() => {
     if (!postId) return;
-    const fetchAllPosts = async () => {
-      try {
-        dispatch(setisLoading(true));
-        const postData = await findPostById(postId);
-        dispatch(setPostDetails(postData));
-      } catch (error) {
-        dispatch(setError(error.message));
-      } finally {
-        dispatch(setisLoading(false));
-      }
-    };
-    fetchAllPosts();
+    dispatch(requestPostDatails(postId))
+      .unwrap()
+      .then(() => {
+        console.log('Hello');
+      });
   }, [postId, dispatch]);
   return (
     <div>

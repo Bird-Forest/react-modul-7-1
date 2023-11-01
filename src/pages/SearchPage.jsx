@@ -1,49 +1,27 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { ReactComponent as IconSearch } from '../components/search.svg';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
-import { findPostById } from 'servise/api';
+
 import Loader from 'components/Loader';
 import ErrorMessage from 'components/Error';
-
-// (async () => { // -- IIFE (Immediately invoked function expression)
-//   try {
-//     setIsLoading(true);
-//     const postData = await findPostById(query);
-
-//     setPosts([postData]);
-//   } catch (error) {
-//     setError(error.message);
-//   } finally {
-//     setIsLoading(false);
-//   }
-// })()
+import { useDispatch, useSelector } from 'react-redux';
+import { requestPosts } from 'redux/thunkAPI';
 
 export default function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get('query');
-  const [posts, setPosts] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(false);
-
+  // postData- це ім'я ред'юсера в стори,  posts - ім'я слайсу
+  const posts = useSelector(state => state.postsData.posts);
+  const isLoading = useSelector(state => state.postsData.isLoading);
+  const error = useSelector(state => state.postsData.error);
   const location = useLocation();
   // console.log(location);
-
+  const dispatch = useDispatch();
   useEffect(() => {
     if (!query) return;
-    const fetchAllPosts = async () => {
-      try {
-        setIsLoading(true);
-        const postsData = await findPostById(query);
-        console.log(postsData);
-        setPosts(postsData);
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchAllPosts();
-  }, [query]);
+
+    dispatch(requestPosts(query));
+  }, [query, dispatch]);
 
   const handleFormSubmit = evt => {
     evt.preventDefault();
